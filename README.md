@@ -197,4 +197,4 @@ This repository processes publicly available CMS data but does **not** contain t
 
 If you use MOSAIC in your research, please cite:
 
-> Fulton, L. (2025). *MOSAIC: A Multi-Objective Signal Aggregation Framework for Forensic Anomaly Detection in Complex Panel Data.* Manuscript under review, Expert Systems with Applications.
+> Fulton, L. (2025). *MOSAIC: A Multi-Objective Signal Aggregation Framework for Forensic Anomaly Detection in Complex Panel Data.* 
