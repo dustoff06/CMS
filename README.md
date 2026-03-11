@@ -1,318 +1,200 @@
-# Hospital Financial Forensics Panel (CMS HCRIS)
+# MOSAIC
+## A Multi-Objective Signal Aggregation Framework for Forensic Anomaly Detection in Complex Panel Data
 
-## Overview
-
-This project constructs a **longitudinal forensic research panel of U.S. hospitals** using the Centers for Medicare & Medicaid Services (CMS) **Hospital Cost Report Information System (HCRIS)**.
-
-The pipeline extracts financial, operational, and structural data from CMS cost reports and converts them into a standardized **hospital–year panel dataset** suitable for:
-
-- financial distress detection  
-- anomaly detection  
-- structural hospital comparisons  
-- machine learning applications  
-- forensic accounting research  
-- healthcare market structure analysis  
-
-The resulting dataset spans **2011–2024** and contains hundreds of derived features designed to detect **behavioral, structural, and financial anomalies** in hospital operations.
-
-The final output is a **fully normalized research panel stored in Parquet format** for high-performance analytics.
+**Author:** Lawrence Fulton · Boston College  
+**Application Domain:** U.S. Hospital Financial Data (CMS HCRIS, 2011–2024)  
+**Target Venue:** Expert Systems with Applications
 
 ---
 
-# Data Source
+## Overview
+
+**MOSAIC** is a generalizable multi-signal fusion framework for forensic anomaly detection in complex longitudinal panel data. It jointly optimizes signal weights across heterogeneous anomaly detectors — combining statistical, machine learning, and behavioral forensic signals — within regime-aware, peer-stratified cohorts.
+
+The framework is demonstrated on **U.S. hospital financial data** sourced from the Centers for Medicare & Medicaid Services (CMS) **Hospital Cost Report Information System (HCRIS)**. However, the architecture is domain-agnostic and applicable to any high-dimensional panel dataset where anomaly signals are multidimensional and context-dependent.
+
+---
+
+## Framework Architecture
+
+MOSAIC operates through five integrated layers:
+
+| Layer | Function |
+|-------|----------|
+| **Ingestion** | Raw panel data extraction and normalization |
+| **Feature Engineering** | Multi-category forensic feature construction |
+| **Peer Stratification** | Regime-aware cohort construction for contextual benchmarking |
+| **Signal Fusion** | Joint optimization of heterogeneous anomaly detector weights |
+| **Scoring** | Hospital–year anomaly scores with interpretable signal decomposition |
+
+### Anomaly Detectors
+
+MOSAIC fuses four complementary signal classes:
+
+- **Benford's Law** — digit-frequency deviation as a proxy for fabrication or manipulation
+- **Mahalanobis Distance** — multivariate outlier detection relative to peer-cohort structure
+- **Isolation Forest** — nonparametric isolation of anomalous observations in high-dimensional space
+- **Variational Autoencoder (VAE)** — deep generative model capturing latent structural regularities; reconstruction error as anomaly score
+
+Signal weights are **jointly optimized per peer cohort and time regime**, not fixed globally.
+
+---
+
+## Data Source
 
 All raw data originate from:
 
 **CMS Healthcare Cost Report Information System (HCRIS)**  
 https://www.cms.gov
 
-Specifically the **HOSP10 files**, which include:
+Specifically the **HOSP10** annual files:
 
 | File | Description |
-|-----|-------------|
+|------|-------------|
 | `RPT` | Report metadata and provider identifiers |
 | `NMRC` | Numeric worksheet data |
 | `ALPHA` | Alphanumeric worksheet data |
 
-These files contain the full financial statements submitted by U.S. hospitals to CMS for Medicare reimbursement purposes.
+CMS cost reports store financial values by **worksheet address** (Worksheet / Line / Column). Example: `G300000 / 00300 / 00100` → Net Patient Revenue.
+
+All worksheet mappings were **empirically validated** across fiscal years 2011–2023 using worksheet sniffing techniques rather than relying on documentation alone.
 
 ---
 
-# Architecture
+## Pipeline Architecture
 
-The pipeline converts raw CMS cost report files into a **structured hospital research panel** through five major stages.
-
-## 1. Raw Data Ingestion
-
-Each fiscal year folder contains:
+```
 HOSP10FYYYYY/
-hosp10_YYYY_RPT
-hosp10_YYYY_NMRC
-hosp10_YYYY_ALPHA
+├── hosp10_YYYY_RPT
+├── hosp10_YYYY_NMRC
+└── hosp10_YYYY_ALPHA
+```
 
-The system reads **Parquet versions of these files** (preferred for performance), with automatic fallback to CSV if needed.
+The pipeline processes raw CMS files through five stages:
 
-Key extraction tables:
-
-- `RPT` — provider identifiers and reporting metadata
-- `NMRC` — numeric worksheet data
-- `ALPHA` — textual identifiers
----
-
-## 2. Worksheet Address Mapping
-
-CMS cost reports store financial values by **worksheet address**:
-Worksheet | Line | Column
-
-Example: G300000 / 00300 / 00100 represents **Net Patient Revenue**.
-
-The pipeline maps these worksheet coordinates into research variables using the configuration:
-
-LOCKED_NUMERIC_FIELDS
-IDENTIFIER_FIELDS
-
-Example mapping: ("net_patient_revenue", "G300000", "00300", "00100")
-
-These mappings were **empirically validated across fiscal years 2011–2023** using worksheet sniffing techniques.
+1. **Raw Data Ingestion** — Parquet-preferred with CSV fallback
+2. **Worksheet Address Mapping** — Empirically validated coordinate-to-variable translation
+3. **Feature Engineering** — 200+ derived variables across ten conceptual categories
+4. **Peer Group Construction** — Stratified cohorts with minimum cell size enforcement
+5. **Panel Assembly** — Hospital–year panel in Parquet format
 
 ---
 
-# Feature Engineering
+## Feature Engineering
 
-The system constructs a large number of analytical variables organized into **ten conceptual categories**.
----
+Variables are organized into ten conceptual categories:
 
-## Category 1 — Clinical & Operational Structure
-Measures scale and patient throughput.
-
-Examples:
-- licensed beds
-- patient days
-- discharges
-- ER visits
-- outpatient volume
-
-Derived indicators:
-revenue_per_discharge
-outpatient_pivot
-forensic_efficiency
----
-
-## Category 2 — Revenue Integrity
-
-Measures billing structure and payer mix.
-
-Examples:
-ccr cost-to-charge ratio
-collection_efficiency
-medicare_dependency
-charity_commitment
----
-
-## Category 3 — Liquidity & Solvency
-
-Captures short- and long-term financial health.
-
-Examples:
-current_ratio
-days_cash_on_hand
-equity_financing
-return_on_assets
-
-Distress indicators:
-liquidity_trap
-cash_exhaustion
-technical_insolvency
----
-
-## Category 4 — Cost Structure
-
-Measures operational cost composition.
-
-Examples:
-labor_intensity
-admin_load
-high_risk_diagnostic_weight
----
-
-## Category 5 — Bankruptcy Signals
-
-Composite indicators of financial collapse.
-
-Example:
-bankruptcy_proxy_score = insolvency
-liquidity_trap
-cash_exhaustion
----
-
-## Category 6 — Cash Flow Velocity
-
-Captures working capital stress.
-
-Examples:
-ar_velocity
-ap_lag
-asset_turnover
----
-
-## Category 7 — Structural Transfers
-
-Measures subsidy dependence and corporate siphoning.
-
-Examples:
-subsidy_intensity
-siphon_ratio
----
-
-## Category 8 — Temporal Velocity
-
-Year-over-year change metrics:
-pct_change_volume_metrics
-delta_financial_metrics
-
-These capture **operational momentum and shock events**.
----
-
-## Category 9 — Behavioral Forensic Signals
-
-Examples:
-### Ghost Labor
-Volume falling while payroll rises.
-
-### Supply Starvation
-Clinical supplies reduced while administrative costs increase.
-
-### Collection Collapse
-Receivables growing while liquidity deteriorates.
-
-These patterns often appear **before formal distress events**.
----
-
-## Category 10 — Market Context
-
-Hospitals are evaluated relative to their market.
-
-Example:
-rel_operating_margin =
-hospital_margin − state_year_median
----
-
-# Peer Group Construction
-
-Hospitals are compared within structurally similar peer groups.
-
-Peer groups incorporate:
-- ownership type
-- hospital size
-- teaching status
-- Critical Access Hospital status
-
-Example peer group:
-nonprofit_large_minor_teaching
-
-Fine peer groups also incorporate **case mix tiers**.
-
-Minimum cell sizes are enforced to prevent unstable comparisons.
----
-
-# Data Regimes
-
-Hospitals are categorized by macroeconomic regime:
-
-| Regime | Years |
-|------|------|
-| Transition | ≤ 2011 |
-| Baseline | 2012–2018 |
-| COVID Shock | 2019–2021 |
-| Recovery | 2022–2024 |
-
-Baseline years anchor peer-group structure.
----
-
-# Data Cleaning & Quality Control
-
-The pipeline performs extensive normalization:
-- worksheet coordinate normalization
-- numeric type coercion
-- outlier winsorization
-- denominator protection
-- infinite value removal
+| # | Category | Examples |
+|---|----------|---------|
+| 1 | Clinical & Operational Structure | licensed beds, patient days, discharges, ER visits |
+| 2 | Revenue Integrity | cost-to-charge ratio, collection efficiency, medicare dependency |
+| 3 | Liquidity & Solvency | current ratio, days cash on hand, technical insolvency flag |
+| 4 | Cost Structure | labor intensity, admin load, diagnostic weight |
+| 5 | Bankruptcy Signals | bankruptcy proxy score, liquidity trap, cash exhaustion |
+| 6 | Cash Flow Velocity | AR velocity, AP lag, asset turnover |
+| 7 | Structural Transfers | subsidy intensity, siphon ratio |
+| 8 | Temporal Velocity | YoY % change metrics, delta financials |
+| 9 | Behavioral Forensic Signals | ghost labor, supply starvation, collection collapse |
+| 10 | Market Context | relative operating margin vs. state-year median |
 
 All analytic variables are winsorized at **1% tails**.
+
 ---
 
-# Output
+## Peer Group Construction
 
-Final dataset:
+Hospitals are evaluated relative to structurally similar peers. Peer groups are defined by:
 
+- Ownership type (nonprofit / for-profit / government)
+- Hospital size (small / medium / large)
+- Teaching status (major teaching / minor teaching / non-teaching)
+- Critical Access Hospital (CAH) status
+- Case mix tier (fine-grained groups)
+
+Example peer group label: `nonprofit_large_minor_teaching`
+
+Minimum cell sizes are enforced to prevent unstable comparisons.
+
+---
+
+## Time Regimes
+
+| Regime | Years | Notes |
+|--------|-------|-------|
+| Transition | ≤ 2011 | Pre-panel anchor |
+| Baseline | 2012–2018 | Peer-group structure anchor |
+| COVID Shock | 2019–2021 | Structural break period |
+| Recovery | 2022–2024 | Post-shock normalization |
+
+Signal weights and peer-group benchmarks are conditioned on regime, allowing MOSAIC to distinguish **secular anomalies** from **regime-driven distributional shifts**.
+
+---
+
+## Output
+
+```
 processed_panel/
-master_hospital_research_panel.parquet
-
-Key characteristics:
+└── master_hospital_research_panel.parquet
+```
 
 | Property | Value |
-|--------|-------|
+|----------|-------|
 | Unit of observation | Hospital–Year |
 | Years covered | 2011–2024 |
 | Variables | 200+ |
-| File format | Parquet |
-| Compression | Snappy |
+| File format | Parquet (Snappy compression) |
+
 ---
 
-# Performance Design
-
-The pipeline is optimized for large-scale CMS data.
-
-Key design choices:
-- Parquet storage for fast IO
-- vectorized extraction from worksheet tables
-- address-based data mapping
-- minimal repeated scans of NMRC tables
----
-
-# Example Use Cases
-
-The dataset supports:
-- anomaly detection models
-- financial distress prediction
-- hospital market structure research
-- healthcare fraud detection
-- machine learning models
-- VAE anomaly detection
-- policy analysis
----
-
-# Running the Pipeline
-
-Example workflow:
+## Usage
 
 ```python
+from mosaic.pipeline import run_year
+
 YEARS_TO_PROCESS = list(range(2011, 2025))
 
 for yr in YEARS_TO_PROCESS:
     result = run_year(yr, BASE_DIR)
 ```
 
-The pipeline automatically builds the master research panel.
+---
 
-Dependencies
+## Dependencies
 
-Python libraries:
+```
 pandas
 numpy
 pyarrow
+scikit-learn
+torch          # VAE component
 pathlib
-re
+```
 
-Recommended environment:
-Python 3.10+
-Disclaimer
+**Recommended:** Python 3.10+, CUDA-capable GPU for VAE training
 
-This repository processes publicly available CMS data but does not contain the raw CMS files.
+---
 
-Users must obtain HCRIS data directly from CMS.
+## Generalizability
 
-Author
+Although demonstrated on CMS HCRIS data, MOSAIC's architecture applies to any complex panel setting where:
 
-Lawrence Fulton
-Boston College
+- Anomaly signals are heterogeneous and not reducible to a single detector
+- Peer-relative context matters (cohort-conditioned scoring)
+- Temporal regimes create non-stationarity that fixed global thresholds cannot handle
+- Interpretability of signal contributions is required
+
+Candidate domains include insurance claims, financial regulatory filings, supply chain audits, and public sector expenditure monitoring.
+
+---
+
+## Disclaimer
+
+This repository processes publicly available CMS data but does **not** contain the raw CMS files. Users must obtain HCRIS data directly from CMS at https://www.cms.gov.
+
+---
+
+## Citation
+
+If you use MOSAIC in your research, please cite:
+
+> Fulton, L. (2025). *MOSAIC: A Multi-Objective Signal Aggregation Framework for Forensic Anomaly Detection in Complex Panel Data.* Manuscript under review, Expert Systems with Applications.
