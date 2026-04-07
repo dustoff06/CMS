@@ -250,9 +250,9 @@ The framework has been extended without modification to skilled nursing facility
 
 ```
 HOSP10FYYYYY/
-├── hosp10_YYYY_RPT
-├── hosp10_YYYY_NMRC
-└── hosp10_YYYY_ALPHA
+├── data
+├── paper
+└── code
 
 processed_panel/
 └── master_hospital_research_panel.parquet
