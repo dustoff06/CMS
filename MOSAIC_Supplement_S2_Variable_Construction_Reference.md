@@ -62,9 +62,7 @@ The labels above describe the conceptual HCRIS inputs. Exact worksheet, line, an
 
 For measure $m$, let $s_m\in\{-1,+1\}$ indicate whether higher raw values represent more favorable institutional performance. Peer-relative deviations are direction-adjusted as
 
-$
-Z_{\mathrm{peer,signed},imt}=s_m Z_{\mathrm{peer},imt}.
-$
+$Z_{\mathrm{peer,signed},imt}=s_m Z_{\mathrm{peer},imt}.$
 
 Positive values therefore represent unusually favorable reported performance after orientation. Several behavioral signals are constructed from the positive tail of these direction-adjusted deviations because unusually strong, persistent, or coordinated favorable reporting patterns can warrant review.
 
@@ -78,12 +76,7 @@ The final MOSAIC catalog separately stores whether higher values of each signal 
 
 For measure $m$, the facility-level residual deviation is
 
-$
-Z_{\mathrm{resid},imt}
-=
-\frac{X_{imt}-\bar{X}_{im,8}}
-{\widehat{\sigma}_{im,12}},
-$
+$Z_{\mathrm{resid},imt}=\frac{X_{imt}-\bar{X}_{im,8}}{\widehat{\sigma}_{im,12}},$
 
 where $\bar{X}_{im,8}$ is the trailing eight-period facility mean and $\widehat{\sigma}_{im,12}$ is the trailing twelve-period standard deviation.
 
