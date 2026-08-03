@@ -41,18 +41,18 @@ Continuous source variables are winsorized at the 1st and 99th percentiles befor
 
 | Category | Indicator | Formula | Primary role |
 |---|---|---|---|
-| Operational efficiency | Revenue per patient day | `$\mathrm{RevPerDay}_{it}=\dfrac{\mathrm{Net\ Patient\ Revenue}_{it}}{\mathrm{Patient\ Days}_{it}}$` | Signal construction |
-| Operational efficiency | Expense per patient day | `$\mathrm{ExpPerDay}_{it}=\dfrac{\mathrm{Total\ Operating\ Expenses}_{it}}{\mathrm{Patient\ Days}_{it}}$` | Signal construction |
-| Liquidity | Days cash on hand | `$\mathrm{DCOH}_{it}=\dfrac{\mathrm{Cash\ \&\ Investments}_{it}}{\mathrm{Total\ Operating\ Expenses}_{it}/365}$` | Distress reference only |
-| Revenue integrity | Cost-to-charge ratio | `$\mathrm{CCR}_{it}=\dfrac{\mathrm{Total\ Operating\ Expenses}_{it}}{\mathrm{Total\ Charges}_{it}}$` | Feature engineering |
-| Structural transfers | Siphon ratio | `$\mathrm{SR}_{it}=\dfrac{\mathrm{Home\ Office\ Adjustments}_{it}}{\mathrm{Total\ Operating\ Costs}_{it}}$` | Feature engineering |
-| Solvency | Current ratio | `$\mathrm{CR}_{it}=\dfrac{\mathrm{Current\ Assets}_{it}}{\mathrm{Current\ Liabilities}_{it}}$` | Distress reference only |
-| Profitability | Return on assets | `$\mathrm{ROA}_{it}=\dfrac{\mathrm{Net\ Income}_{it}}{\mathrm{Total\ Assets}_{it}}$` | Feature engineering |
-| Profitability | Operating margin | `$\mathrm{OM}_{it}=\dfrac{\mathrm{Net\ Patient\ Revenue}_{it}-\mathrm{Total\ Operating\ Expenses}_{it}}{\mathrm{Net\ Patient\ Revenue}_{it}}$` | Distress reference and source for specific anomaly signals |
-| Cost structure | Labor intensity | `$\mathrm{LaborIntensity}_{it}=\dfrac{\mathrm{Total\ Salaries\ \&\ Benefits}_{it}}{\mathrm{Total\ Operating\ Expenses}_{it}}$` | Feature engineering |
-| Cash-flow dynamics | Accounts receivable days | `$\mathrm{ARDays}_{it}=\dfrac{\mathrm{Accounts\ Receivable}_{it}}{\mathrm{Net\ Patient\ Revenue}_{it}/365}$` | Feature engineering |
-| Cash-flow dynamics | Accounts payable days | `$\mathrm{APDays}_{it}=\dfrac{\mathrm{Accounts\ Payable}_{it}}{\mathrm{Total\ Operating\ Expenses}_{it}/365}$` | Feature engineering |
-| Payer mix | Charity-care share | `$\mathrm{CharityShare}_{it}=\dfrac{\mathrm{Charity\ Care\ Cost}_{it}}{\mathrm{Total\ Operating\ Expenses}_{it}}$` | Feature engineering |
+| Operational efficiency | Revenue per patient day | $`\mathrm{RevPerDay}_{it}=\dfrac{\mathrm{Net\ Patient\ Revenue}_{it}}{\mathrm{Patient\ Days}_{it}}`$ | Signal construction |
+| Operational efficiency | Expense per patient day | $`\mathrm{ExpPerDay}_{it}=\dfrac{\mathrm{Total\ Operating\ Expenses}_{it}}{\mathrm{Patient\ Days}_{it}}`$ | Signal construction |
+| Liquidity | Days cash on hand | $`\mathrm{DCOH}_{it}=\dfrac{\mathrm{Cash\ \&\ Investments}_{it}}{\mathrm{Total\ Operating\ Expenses}_{it}/365}`$ | Distress reference only |
+| Revenue integrity | Cost-to-charge ratio | $`\mathrm{CCR}_{it}=\dfrac{\mathrm{Total\ Operating\ Expenses}_{it}}{\mathrm{Total\ Charges}_{it}}`$ | Feature engineering |
+| Structural transfers | Siphon ratio | $`\mathrm{SR}_{it}=\dfrac{\mathrm{Home\ Office\ Adjustments}_{it}}{\mathrm{Total\ Operating\ Costs}_{it}}`$ | Feature engineering |
+| Solvency | Current ratio | $`\mathrm{CR}_{it}=\dfrac{\mathrm{Current\ Assets}_{it}}{\mathrm{Current\ Liabilities}_{it}}`$ | Distress reference only |
+| Profitability | Return on assets | $`\mathrm{ROA}_{it}=\dfrac{\mathrm{Net\ Income}_{it}}{\mathrm{Total\ Assets}_{it}}`$ | Feature engineering |
+| Profitability | Operating margin | $`\mathrm{OM}_{it}=\dfrac{\mathrm{Net\ Patient\ Revenue}_{it}-\mathrm{Total\ Operating\ Expenses}_{it}}{\mathrm{Net\ Patient\ Revenue}_{it}}`$ | Distress reference and source for specific anomaly signals |
+| Cost structure | Labor intensity | $`\mathrm{LaborIntensity}_{it}=\dfrac{\mathrm{Total\ Salaries\ \&\ Benefits}_{it}}{\mathrm{Total\ Operating\ Expenses}_{it}}`$ | Feature engineering |
+| Cash-flow dynamics | Accounts receivable days | $`\mathrm{ARDays}_{it}=\dfrac{\mathrm{Accounts\ Receivable}_{it}}{\mathrm{Net\ Patient\ Revenue}_{it}/365}`$ | Feature engineering |
+| Cash-flow dynamics | Accounts payable days | $`\mathrm{APDays}_{it}=\dfrac{\mathrm{Accounts\ Payable}_{it}}{\mathrm{Total\ Operating\ Expenses}_{it}/365}`$ | Feature engineering |
+| Payer mix | Charity-care share | $`\mathrm{CharityShare}_{it}=\dfrac{\mathrm{Charity\ Care\ Cost}_{it}}{\mathrm{Total\ Operating\ Expenses}_{it}}`$ | Feature engineering |
 
 The labels above describe the conceptual HCRIS inputs. Exact worksheet, line, and column mappings are maintained in the repository extraction code because HCRIS field layouts vary across annual releases.
 
@@ -60,7 +60,7 @@ The labels above describe the conceptual HCRIS inputs. Exact worksheet, line, an
 
 ## 3. Directional Harmonization
 
-For measure $m$, let `$s_m\in\{-1,+1\}$` indicate whether higher raw values represent more favorable institutional performance. Peer-relative deviations are direction-adjusted as
+For measure $m$, let $`s_m\in\{-1,+1\}`$ indicate whether higher raw values represent more favorable institutional performance. Peer-relative deviations are direction-adjusted as
 
 ```math
 Z_{\mathrm{peer,signed},imt}=s_m Z_{\mathrm{peer},imt}.
@@ -82,7 +82,7 @@ For measure $m$, the facility-level residual deviation is
 Z_{\mathrm{resid},imt}=\frac{X_{imt}-\bar{X}_{im,8}}{\widehat{\sigma}_{im,12}},
 ```
 
-where `$\bar{X}_{im,8}$` is the trailing eight-period facility mean and `$\widehat{\sigma}_{im,12}$` is the trailing twelve-period standard deviation.
+where $`\bar{X}_{im,8}`$ is the trailing eight-period facility mean and $`\widehat{\sigma}_{im,12}`$ is the trailing twelve-period standard deviation.
 
 ### 4.2 Temporal acceleration
 
@@ -115,7 +115,7 @@ The executed `mahal_relational_score` uses a minimum-covariance-determinant fit 
 ### 4.5 Cross-measure dispersion
 
 ```math
-\sigma_{\mathrm{facility},it}=\operatorname{SD}_{m}\left(Z_{\mathrm{peer,signed},imt}\right).
+\sigma_{\mathrm{facility},it}=\mathrm{SD}_{m}\left(Z_{\mathrm{peer,signed},imt}\right).
 ```
 
 This represents inconsistency across multiple reported performance measures within a report record.
@@ -136,12 +136,12 @@ For a six-report rolling window, a second-order polynomial is fitted to operatin
 \mathrm{OM}_{i,t-j}=\beta_{0i}+\beta_{1i}j+\beta_{2i}j^2+\varepsilon_{i,t-j},\qquad j=0,\ldots,5.
 ```
 
-The signal `margin_curv6` is the estimated quadratic coefficient `$\widehat{\beta}_{2i}$` and requires at least five usable observations.
+The signal `margin_curv6` is the estimated quadratic coefficient $`\widehat{\beta}_{2i}`$ and requires at least five usable observations.
 
 ### 4.8 Residual volatility
 
 ```math
-\sigma^{\mathrm{resid},4}_{it}=\operatorname{SD}\left(Z_{\mathrm{resid},i,t-3},\ldots,Z_{\mathrm{resid},it}\right).
+\sigma^{\mathrm{resid},4}_{it}=\mathrm{SD}\left(Z_{\mathrm{resid},i,t-3},\ldots,Z_{\mathrm{resid},it}\right).
 ```
 
 The executed `z_resid_roll_std4` uses a four-report rolling standard deviation with at least two observations.
@@ -164,7 +164,7 @@ The executed `rank_instability_mean` averages absolute provider-level changes in
 
 ### 4.11 Benford first-digit divergence
 
-For eligible peer-year cells, the observed first-digit distribution `$p_d$` is compared with the Benford reference distribution `$b_d=\log_{10}(1+1/d)$`:
+For eligible peer-year cells, the observed first-digit distribution $`p_d`$ is compared with the Benford reference distribution $`b_d=\log_{10}(1+1/d)`$:
 
 ```math
 \mathrm{BenfordKL}=\sum_{d=1}^{9}p_d\log\left(\frac{p_d}{b_d}\right).
@@ -187,7 +187,7 @@ This retains the positive tail of direction-adjusted peer deviations.
 ### 5.2 Robust peer score
 
 ```math
-Z^{\mathrm{rob}}_{\mathrm{peer},imt}=\frac{0.6745\left(X_{imt}-\operatorname{median}_{g}(X_{mt})\right)}{\operatorname{MAD}_{g}(X_{mt})}.
+Z^{\mathrm{rob}}_{\mathrm{peer},imt}=\frac{0.6745\left(X_{imt}-\mathrm{median}_{g}(X_{mt})\right)}{\mathrm{MAD}_{g}(X_{mt})}.
 ```
 
 ### 5.3 Peer-weighted favorable-deviation score
@@ -200,7 +200,7 @@ The report-level `goodz_weighted_sum` is the sum of positive direction-adjusted 
 
 ### 5.4 Operating-margin bunching
 
-Let `$\mathcal{T}=\{-0.05,-0.02,0,0.02,0.05,0.10\}$` denote the prespecified operating-margin thresholds. Then
+Let $`\mathcal{T}=\{-0.05,-0.02,0,0.02,0.05,0.10\}`$ denote the prespecified operating-margin thresholds. Then
 
 ```math
 \mathrm{BUNCH}_{it}=\frac{1}{\min_{\tau\in\mathcal{T}}|\mathrm{OM}_{it}-\tau|+\varepsilon}.
@@ -236,7 +236,7 @@ The elevated flag is based on the summed positive direction-adjusted peer z-scor
 
 ### 5.8 Strategic Reporting Risk Index
 
-Let `$b_{j,it}\in[0,1]$` denote the percentile-ranked value of behavioral component $j$, with $J=9$. The executed SRRI is
+Let $`b_{j,it}\in[0,1]`$ denote the percentile-ranked value of behavioral component $j$, with $J=9$. The executed SRRI is
 
 ```math
 \mathrm{SRRI}_{it}=100\left[0.8\left(\frac{1}{J}\sum_{j=1}^{J}b_{j,it}\right)+0.2\left(\frac{b_{\mathrm{persist},it}+b_{\mathrm{coord},it}}{4}\right)\right].
@@ -318,10 +318,10 @@ Numeric cut points should be archived in `mosaic_signal_decile_cutpoints.csv` af
 
 After the 108-input catalog has been assembled, each input is direction-harmonized and percentile-normalized within peer cohort × time regime.
 
-For signal $k$ in cohort-regime cell `$(c,r)$`,
+For signal $k$ in cohort-regime cell $`(c,r)`$,
 
 ```math
-\widetilde{S}_{it}^{(k)}=\operatorname{PctRank}_{c,r}\left(S_{it}^{(k)}\right).
+\widetilde{S}_{it}^{(k)}=\mathrm{PctRank}_{c,r}\left(S_{it}^{(k)}\right).
 ```
 
 The implemented fallback sequence is:
@@ -356,7 +356,7 @@ and
 d_{it}=\frac{a^{CR}_{it}+a^{OM}_{it}+a^{DCOH}_{it}}{3}.
 ```
 
-Here `$\sigma(u)=1/(1+e^{-u})$`. The reference orients the Baseline aggregation weights but is not a fraud label, adjudicated audit finding, or direct MOSAIC input.
+Here $`\sigma(u)=1/(1+e^{-u})`$. The reference orients the Baseline aggregation weights but is not a fraud label, adjudicated audit finding, or direct MOSAIC input.
 
 ---
 
