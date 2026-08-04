@@ -8,7 +8,7 @@
 
 \subsection{Purpose}
 
-This supplement consolidates the software environment, hardware, and determinism controls underlying the primary MOSAIC estimation and all revision analyses (MOSAIC-X, signal-family ablations, GBM/GBM-X, DeepSVDD, and the financial-distress benchmarks). Optimization hyperparameters (restarts, iteration limits, sample limits) and model-specific settings (XGBoost parameters, DeepSVDD architecture and training schedule) are reported in Appendix~D and Section~2.7 of the main text; this supplement addresses the computing environment and reproducibility controls that are not restated there.
+This supplement documents the software environment, hardware configuration, numerical-precision settings, random-seeding procedures, and reproducibility controls underlying the primary MOSAIC estimation and all revision analyses, including MOSAIC-X, the signal-family ablations, GBM and GBM-X, DeepSVDD, and the established financial-distress benchmarks. Optimization hyperparameters and model-specific training settings are reported in Supplement~S4 and Section~2.7 of the main text; the present supplement records the computational environment and execution controls needed to reproduce those analyses.
 
 \subsection{Hardware}
 
