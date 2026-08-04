@@ -2,13 +2,13 @@
 
 ## Mathematical Programming Formulation
 
-## D.1 Scope
+### Scope
 
 This appendix gives the mathematical specification of the MOSAIC weight-estimation problem implemented in the locked common-panel analysis. The formulation separates three stages: estimation of a global Baseline weight vector, estimation and hierarchical pooling of Baseline cohort weight vectors, and application of the resulting cohort weights without re-estimation in every time regime. Signal construction, percentile normalization, and median imputation occur before the optimization and are treated here as fixed inputs.
 
 The primary specification contains `K = 108` signals. MOSAIC-X solves the same problem after removing the 22 operating-margin bunching and curvature signals, leaving `K_X = 86`. The optimization architecture, parameter values, temporal training rule, and scoring equation are otherwise unchanged.
 
-## D.2 Sets and indices
+### Sets and indices
 
 | Symbol | Definition |
 |---|---|
@@ -36,7 +36,7 @@ and
 B_c=\{(i,t)\in B:c(i)=c\}.
 ```
 
-## D.3 Fixed inputs
+### Fixed inputs
 
 For each observation `(i,t)` and signal `k`, let the direction-corrected, percentile-normalized signal be
 
@@ -103,7 +103,7 @@ d_{it}\in[0,1].
 
 When an anchor component is missing, that component is assigned the neutral value `0.5` before the three components are averaged. The raw anchor variables do not enter the primary MOSAIC signal catalog.
 
-## D.4 Decision variables and simplex parameterization
+### Decision variables and simplex parameterization
 
 The global decision vector is
 
@@ -153,7 +153,7 @@ w_k(\boldsymbol\theta)
 
 This parameterization produces strictly positive weights in exact arithmetic, although weights can become numerically indistinguishable from zero.
 
-## D.5 MOSAIC fused score
+### MOSAIC fused score
 
 Given a feasible cohort weight vector, the MOSAIC score for observation `(i,t)` is
 
@@ -180,7 +180,7 @@ For any fitting subset `A`, define the score vector
 \right)_{(i,t)\in A}.
 ```
 
-## D.6 Differentiable rank concordance
+### Differentiable rank concordance
 
 The implemented objective uses a differentiable approximation to rank. For a vector `x = (x_1,\ldots,x_n)`, the soft rank of observation `j` is
 
@@ -219,7 +219,7 @@ R_\tau\!\left(\mathbf d_A\right)
 
 Because the optimizer minimizes the objective, the concordance contribution is `-ρ_{τ,A}(w)`.
 
-## D.7 Directional monotonicity penalty
+### Directional monotonicity penalty
 
 For a fitting subset `A`, define the high- and low-distress partitions as
 
@@ -271,7 +271,7 @@ with
 
 The penalty is activated only when both `H_A` and `L_A` contain at least five observations. Directional ordering is therefore a soft penalty rather than a hard feasibility constraint.
 
-## D.8 Cross-signal Kendall quantity
+### Cross-signal Kendall quantity
 
 For fitting set `A` with `n_A` observations, let `r_{it}^{(k)}` be the soft rank of signal `k` within `A`. Define the summed signal rank for observation `(i,t)` as
 
@@ -317,7 +317,7 @@ The objective records the term
 
 **Implementation identity.** `W_A` depends only on the fixed signal matrix for fitting set `A`. It does not depend on the decision vector `w`. Consequently, `-ηW_A` shifts the reported objective value but does not alter the minimizing weight vector. In the current implementation, cross-signal Kendall concordance is therefore a fitting-sample diagnostic offset rather than a weight-identifying objective component.
 
-## D.9 Generic penalized objective
+### Generic penalized objective
 
 For fitting set `A`, optional reference vector `w^ref`, and pooling coefficient `λ`, define
 
@@ -362,7 +362,7 @@ P_{\mathrm{mono},A}(\mathbf w)
 
 Thus, the implemented weights are identified by distress-anchor rank concordance, the directional separation penalty, and (for cohort fits) hierarchical pooling.
 
-## D.10 Global Baseline optimization
+## Global Baseline optimization
 
 The global weight vector is estimated from all Baseline observations. The mathematical program is
 
@@ -515,7 +515,7 @@ The vector remains on the simplex because it is a convex combination of two simp
 
 The primary implementation therefore pools cohort weights twice: first through the quadratic penalty inside the cohort optimization and second through the post-estimation convex shrinkage rule.
 
-## D.13 Frozen application across regimes
+### Frozen application across regimes
 
 The final Baseline-estimated cohort vector is copied unchanged to every observed regime:
 
@@ -538,7 +538,7 @@ F_{it}
 
 The current primary implementation does not estimate separate cohort-by-regime weight vectors. It also does not activate the generic temporal smoothness penalty available in the optimizer (`λ_s = 0` and no previous-regime reference vector is supplied). Temporal stability is imposed through exact freezing of the Baseline cohort weights, not through penalized smoothing between successive regime-specific solutions.
 
-## D.14 Exact signal attribution
+### Exact signal attribution
 
 Because the final score is linear in the normalized, imputed signals, the exact contribution of signal `k` to observation `(i,t)` is
 
@@ -560,7 +560,7 @@ C_{itk}.
 
 This identity supports case-level explanations without requiring a secondary surrogate or post hoc approximation model.
 
-## D.15 Numerical solution
+### Numerical solution
 
 The global and cohort problems are nonlinear because the soft-rank correlation depends nonlinearly on the fused score. They are solved on the GPU using multi-start L-BFGS with a strong-Wolfe line search. The production settings are summarized below.
 
@@ -586,7 +586,7 @@ If a fitting set contains more than 3,000 observations, a deterministic simple r
 
 The objective reported by the optimizer is evaluated before the post-optimization sample-size shrinkage step. The final deployed cohort vector is the convexly shrunk vector defined in Section D.12.
 
-## D.16 MOSAIC-X
+### MOSAIC-X
 
 Let `K_X ⊂ K` denote the restricted signal set obtained by removing the operating-margin bunching and operating-margin curvature families. The MOSAIC-X global and cohort problems are identical to the primary problems after replacing `K` by `K_X` and rebuilding the normalized signal matrix on the retained columns:
 
