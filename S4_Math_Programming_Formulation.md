@@ -1,4 +1,6 @@
-# Supplement S4 Mathematical Programming Formulation
+# Supplement S4 
+
+## Mathematical Programming Formulation
 
 ## D.1 Scope
 
