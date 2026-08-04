@@ -183,7 +183,7 @@ For any fitting subset `A`, define the score vector
 The implemented objective uses a differentiable approximation to rank. For a vector `x = (x_1,\ldots,x_n)`, the soft rank of observation `j` is
 
 ```math
-\operatorname{srank}_{\tau}(x_j)
+\mathrm{srank}_{\tau}(x_j)
 =
 \sum_{\ell=1}^{n}
 \sigma\!\left(
@@ -208,7 +208,7 @@ Let `R_τ(x)` denote the vector of soft ranks. The differentiable Spearman appro
 ```math
 \rho_{\tau,A}(\mathbf w)
 =
-\operatorname{Corr}
+\mathrm{Corr}
 \left[
 R_\tau\!\left(\mathbf F_A(\mathbf w)\right),
 R_\tau\!\left(\mathbf d_A\right)
@@ -370,7 +370,7 @@ The global weight vector is estimated from all Baseline observations. The mathem
 \underset{
 \mathbf w\in\Delta^{K-1}
 }{
-\operatorname{argmin}
+\mathrm{argmin}
 }
 \left[
 -\rho_{\tau,B}(\mathbf w)
@@ -388,7 +388,7 @@ Equivalently, because `W_B` is constant with respect to the decision variables,
 \underset{
 \mathbf w\in\Delta^{K-1}
 }{
-\operatorname{argmin}
+\mathrm{argmin}
 }
 \left[
 -\rho_{\tau,B}(\mathbf w)
@@ -409,7 +409,7 @@ For cohort `c` with a sufficient Baseline sample, an unshrunk cohort vector is o
 \underset{
 \mathbf w\in\Delta^{K-1}
 }{
-\operatorname{argmin}
+\mathrm{argmin}
 }
 \left[
 -\rho_{\tau,B_c}(\mathbf w)
@@ -438,7 +438,7 @@ The decision-equivalent cohort problem is
 \underset{
 \mathbf w\in\Delta^{K-1}
 }{
-\operatorname{argmin}
+\mathrm{argmin}
 }
 \left[
 -\rho_{\tau,B_c}(\mathbf w)
@@ -477,7 +477,7 @@ For an estimated cohort vector, MOSAIC applies an additional sample-size-depende
 ```math
 \alpha_c
 =
-\operatorname{clip}
+\mathrm{clip}
 \left(
 \frac{n_c}{n_c+n_0},
 0.1,
@@ -608,7 +608,7 @@ First, estimate the global Baseline vector:
 \underset{
 \mathbf w\in\Delta^{K-1}
 }{
-\operatorname{argmin}
+\mathrm{argmin}
 }
 \left[
 -\rho_{\tau,B}(\mathbf w)
@@ -625,7 +625,7 @@ Second, for each cohort with at least 150 Baseline observations, estimate
 \underset{
 \mathbf w\in\Delta^{K-1}
 }{
-\operatorname{argmin}
+\mathrm{argmin}
 }
 \left[
 -\rho_{\tau,B_c}(\mathbf w)
