@@ -1,108 +1,112 @@
-# Appendix C: Supplementary Robustness, Supervised Benchmarking, and Exact Case-Level Attribution
+# Supplement S3
+## Robustness Analyses, Supervised Benchmarking, and Exact Attribution
 
-## C.1 Common-panel design and classification rules
+### Common-panel design and evaluation rules
 
-All supplementary analyses were conducted on the same locked panel of 83,512 hospital cost-report observations and preserved the identical row order used by the primary MOSAIC and MOSAIC-X models. The locked-panel requirement prevented observations from the larger ambient master file from entering any comparator, ablation, or external-validation analysis. MOSAIC, MOSAIC-X, the three signal-family ablations, GBM, and GBM-X therefore differ only in model specification or retained signals rather than in their evaluation samples.
+All robustness models were evaluated on the locked panel of 83,512 HCRIS report records in the same row order as the primary specification. MOSAIC-X retained 86 inputs after removing the 22 operating-margin bunching and six-period curvature indicators. The remaining ablations separately removed the behavioral family, the analytical family (statistical plus temporal inputs), or the three explicitly model-based percentile scores. Every variant was re-estimated using the same Baseline-only weighting architecture and was applied to the same Transition, COVID-Shock, and Recovery records.
 
-For each model, risk tiers were defined from its own Baseline score distribution. High plus Critical status corresponded to the upper 40% of Baseline scores, while Critical status corresponded to the upper 20%. These Baseline-derived cutoffs were then applied unchanged to the matched pre-event bankruptcy and enforcement records. One-sided exact binomial tests evaluated whether event capture exceeded the corresponding chance benchmarks of 0.40 and 0.20. This procedure permits models with different score scales to be compared using the same operational review fractions.
+The event-tier analysis uses model-specific Baseline score distributions. High plus Critical denotes the upper 40% of Baseline scores, while Critical denotes the upper 20%. The Baseline cut points are applied unchanged to matched pre-event records. One-sided exact binomial tests compare observed event capture with null probabilities of 0.40 and 0.20. The bankruptcy analysis contains 86 matched event rows, and the enforcement analysis contains 30. These event-row analyses are distinct from the review-budget analysis, which deduplicates repeated event links and evaluates 84 unique bankruptcy-positive reports and 30 enforcement-positive reports.
 
-MOSAIC-X removed the operating-margin bunching and curvature signal families to assess whether the primary findings depended on signals closely related to conventional financial distress measures. The remaining ablations separately removed the behavioral, analytical, and model-based signal families. The supervised gradient-boosting comparators were fitted to the Baseline distress anchor using XGBoost with CUDA acceleration. To avoid embedding MOSAIC's model outputs inside the supervised comparator, the Isolation Forest, Transformer, and VAE scores were excluded from both GBM specifications. GBM retained 105 normalized signals, while GBM-X retained the 83-signal MOSAIC-X input set.
+### Internal signal-family robustness
 
----
+The table below reports alignment with the weak supervisory reference under signal exclusion. MOSAIC-X retained most of the primary internal alignment. Removing the behavioral family caused the largest decline in global concordance, within-peer-year rank concordance, fixed-effect concordance, and quartile separation. Removing the three explicit model-based outputs produced only a modest reduction, consistent with their small total weight in the primary solution.
 
-## C.2 Exact case-level score attribution
+**Table S3.1: Internal alignment under signal exclusion**
 
-The MOSAIC score for report $i$ in period $t$ can be written as
+| Model | $N$ | $\rho_{\mathrm{global}}$ | $\rho_{\mathrm{peer-year\ rank}}$ | $\rho_{\mathrm{peer/year\ FE}}$ | Separation |
+|---|---:|---:|---:|---:|---:|
+| MOSAIC | 83,512 | 0.5579 | 0.5364 | 0.5790 | 0.4031 |
+| MOSAIC-X | 83,512 | 0.5398 | 0.5197 | 0.5551 | 0.3892 |
+| Minus behavioral | 83,512 | 0.3379 | 0.3152 | 0.3385 | 0.2449 |
+| Minus analytical | 83,512 | 0.5284 | 0.5040 | 0.5486 | 0.3765 |
+| Minus model-based | 83,512 | 0.5501 | 0.5263 | 0.5692 | 0.3931 |
 
-```math
-F_{it}=\sum_{k=1}^{K}w_{k}^{*(c(i))}\widetilde{S}_{it}^{(k)},
-```
+*Note.* All variants use the identical 83,512-report panel. Analytical signals comprise the statistical and temporal implementation dimensions. The peer/year fixed-effect correlation is distinct from the within-peer-year rank correlation.
 
-where $`\widetilde{S}_{it}^{(k)}`$ is the imputed and normalized value of signal $k$ and $`w_{k}^{*(c(i))}`$ is the final weight assigned to that signal for the hospital's peer cohort. The exact contribution of signal $k$ is therefore
+### External event concentration under signal exclusion
 
-```math
-C_{itk}=w_{k}^{*(c(i))}\widetilde{S}_{it}^{(k)}.
-```
+MOSAIC classified 63 of 86 bankruptcy event rows (73.3%) as High or Critical and 45 (52.3%) as Critical (Table S3.2). MOSAIC-X remained close at 61 (70.9%) and 41 (47.7%), respectively. Removing behavioral signals produced the largest decline in broad bankruptcy capture. Removing analytical signals yielded the highest bankruptcy capture among the ablations, but this does not imply that the reduced model is generally preferable because the primary specification estimates one common ranking against the prespecified supervisory reference rather than optimizing separately for each external outcome.
 
-The complete case-level audit reconstructed every stored MOSAIC score from these row-specific contributions. The maximum absolute reconstruction error was $9.20\times10^{-8}$, which is numerically negligible and confirms that the attribution values sum to the implemented score rather than approximating it through a secondary explanation model.
+**Table S3.2: Bankruptcy event concentration under signal exclusion**
 
-Forty-three Critical-tier bankruptcy event records could be linked one-to-one to exact cost-report records for contribution reconstruction. Three representative cases were selected using a prespecified rule: the observations nearest the 25th, 50th, and 75th percentiles of the MOSAIC score distribution within this exact-linkage subset. For each case, **Figure C.1** (see below) reports the eight largest signal contributions and the aggregate contribution of all remaining signals. The displayed values sum exactly to the corresponding MOSAIC score. These contributions describe the construction of the score and should not be interpreted as causal effects.
-
-> *[Figure C.1 — Signal-level decomposition of three Critical-tier pre-bankruptcy records, nearest the 25th, 50th, and 75th percentiles of Critical-tier MOSAIC scores. Insert `revision_case_interpretability` figure here.]*
-
----
-
-## C.3 External validation of MOSAIC-X and signal-family ablations
-
-**Table C.1** reports bankruptcy capture for the primary models, the three ablations, and the supervised comparators. Primary MOSAIC classified 63 of 86 bankruptcy events (73.3%) as High or Critical and 45 events (52.3%) as Critical. MOSAIC-X remained close, capturing 61 events (70.9%) in the upper 40% and 41 events (47.7%) in the Critical tier. The limited change after removing the operating-margin bunching and curvature families indicates that the bankruptcy findings were not driven by those anchor-adjacent signals.
-
-Removing the behavioral family produced the largest broad reduction among the MOSAIC ablations, lowering High plus Critical bankruptcy capture to 65.1%. Removing the analytical family did not reduce broad bankruptcy capture and yielded the highest Critical capture among the ablations at 54.7%. Removing the model-based family reduced High plus Critical capture to 68.6%, while Critical capture remained close to the primary model at 51.2%. The ablation pattern indicates that no single signal family accounts for the primary bankruptcy result, although the behavioral signals appear to contribute materially to broad event coverage.
-
-**Table C.1: Bankruptcy event capture on the locked common panel**
-
-| Model | High+Critical n (%) | High+Critical $p$ | Critical n (%) | Critical $p$ |
+| Model | High + Critical, $n$ (%) | Exact $p$ | Critical, $n$ (%) | Exact $p$ |
 |---|---:|---:|---:|---:|
 | MOSAIC | 63 (73.3) | <0.0001 | 45 (52.3) | <0.0001 |
 | MOSAIC-X | 61 (70.9) | <0.0001 | 41 (47.7) | <0.0001 |
-| MOSAIC without behavioral signals | 56 (65.1) | <0.0001 | 38 (44.2) | <0.0001 |
-| MOSAIC without analytical signals | 64 (74.4) | <0.0001 | 47 (54.7) | <0.0001 |
-| MOSAIC without model-based signals | 59 (68.6) | <0.0001 | 44 (51.2) | <0.0001 |
-| GBM (supervised) | 63 (73.3) | <0.0001 | 36 (41.9) | <0.0001 |
-| GBM-X (supervised) | 67 (77.9) | <0.0001 | 35 (40.7) | <0.0001 |
+| Minus behavioral | 56 (65.1) | <0.0001 | 38 (44.2) | <0.0001 |
+| Minus analytical | 64 (74.4) | <0.0001 | 47 (54.7) | <0.0001 |
+| Minus model-based | 59 (68.6) | <0.0001 | 44 (51.2) | <0.0001 |
 
-*Note.* $N=86$ matched bankruptcy events with valid scores for each model. High plus Critical represents the upper 40% of the model-specific Baseline score distribution, and Critical represents the upper 20%. Reported $p$-values are one-sided exact binomial tests against null capture probabilities of 0.40 and 0.20, respectively.
+*Note.* $N=86$ matched bankruptcy event rows with valid scores for every model. Exact $p$-values are one-sided binomial tests against null capture probabilities of 0.40 for High plus Critical and 0.20 for Critical.
 
-The enforcement results in **Table C.2** provide a more discriminating test of signal-family composition. Primary MOSAIC captured 60.0% of enforcement events in the High plus Critical tiers and 50.0% in the Critical tier. MOSAIC-X preserved the same broad capture and retained 43.3% Critical capture. Removing behavioral signals reduced both measures, while removing analytical signals increased broad capture to 66.7% but reduced Critical capture to 33.3%. This contrast suggests that the analytical signals contribute more to concentration at the extreme upper tail than to broad inclusion within the upper 40%. Removing the model-based family produced only modest reductions relative to primary MOSAIC.
+For enforcement, MOSAIC captured 18 of 30 events (60.0%) in the High plus Critical tiers and 15 (50.0%) in the Critical tier (Table S3.3). MOSAIC-X preserved broad capture and classified 13 events (43.3%) as Critical. Removing analytical signals increased broad capture to 66.7% but reduced Critical capture to 33.3%, indicating that the analytical family contributed more to extreme-tail concentration than to inclusion in the upper 40%. Removing the model-based family had a comparatively modest effect.
 
-**Table C.2: Enforcement event capture on the locked common panel**
+**Table S3.3: Enforcement event concentration under signal exclusion**
 
-| Model | High+Critical n (%) | High+Critical $p$ | Critical n (%) | Critical $p$ |
+| Model | High + Critical, $n$ (%) | Exact $p$ | Critical, $n$ (%) | Exact $p$ |
 |---|---:|---:|---:|---:|
 | MOSAIC | 18 (60.0) | 0.0212 | 15 (50.0) | 0.0002 |
 | MOSAIC-X | 18 (60.0) | 0.0212 | 13 (43.3) | 0.0031 |
-| MOSAIC without behavioral signals | 16 (53.3) | 0.0971 | 11 (36.7) | 0.0256 |
-| MOSAIC without analytical signals | 20 (66.7) | 0.0029 | 10 (33.3) | 0.0611 |
-| MOSAIC without model-based signals | 17 (56.7) | 0.0481 | 14 (46.7) | 0.0009 |
-| GBM (supervised) | 17 (56.7) | 0.0481 | 7 (23.3) | 0.3930 |
-| GBM-X (supervised) | 19 (63.3) | 0.0083 | 8 (26.7) | 0.2392 |
+| Minus behavioral | 16 (53.3) | 0.0971 | 11 (36.7) | 0.0256 |
+| Minus analytical | 20 (66.7) | 0.0029 | 10 (33.3) | 0.0611 |
+| Minus model-based | 17 (56.7) | 0.0481 | 14 (46.7) | 0.0009 |
 
-*Note.* $N=30$ matched enforcement events with valid scores for each model. High plus Critical represents the upper 40% of the model-specific Baseline score distribution, and Critical represents the upper 20%. Reported $p$-values are one-sided exact binomial tests against null capture probabilities of 0.40 and 0.20, respectively.
+*Note.* $N=30$ matched enforcement event rows with valid scores for every model. Exact $p$-values are one-sided binomial tests against null capture probabilities of 0.40 for High plus Critical and 0.20 for Critical.
 
----
+### Supervised gradient-boosting benchmark
 
-## C.4 Supervised gradient-boosting comparator
+The full gradient-boosting model was retained as a supervised challenger rather than as a MOSAIC component. It was fitted to the Baseline distress reference using 105 normalized inputs after excluding the three explicit model-based percentile outputs. Because GBM was directly trained on the reference used to fit MOSAIC's weights, internal anchor concordance is not an independent validation criterion. The comparison below therefore focuses on unique known-positive reports found under fixed review budgets.
 
-GBM was included as a supervised challenger rather than as a component of MOSAIC. The model was trained on the Baseline distress anchor, whereas MOSAIC estimates a constrained weakly supervised combination of heterogeneous signals. The anchor-concordance measures in **Table C.3** are therefore descriptive fit diagnostics rather than independent external-validation statistics. Full GBM attained a global Spearman correlation of 0.6299 with the distress anchor, while GBM-X attained 0.6149. The corresponding peer-year rank correlations were 0.5586 and 0.5436, and the peer-year fixed-effect correlations were 0.5962 and 0.5799.
+The bankruptcy risk set contains 27,707 eligible reports and 84 unique positive reports. The enforcement risk set contains 18,228 eligible reports and 30 positive reports. At a 5% bankruptcy review budget, MOSAIC captured 15 positive reports and GBM captured 16. At 10%, MOSAIC captured 27 and GBM captured 32. The paired differences were not significant. At a 10% enforcement budget, MOSAIC captured six positive reports and GBM captured five, again with no paired difference.
 
-**Table C.3: Descriptive distress-anchor concordance for the supervised comparators**
+**Table S3.4: MOSAIC and supervised GBM capture under fixed review budgets**
 
-| Model | $N$ | Global $\rho_S$ | Peer-year rank $\rho_S$ | Peer-year FE $\rho_S$ | Quartile separation |
+| Outcome | Budget | MOSAIC, $n/N$ (%) | GBM, $n/N$ (%) | MOSAIC only | GBM only | Paired $p$ |
+|---|---|---:|---:|---:|---:|---:|
+| Bankruptcy | 1% | 3/84 (3.6) | 4/84 (4.8) | 3 | 4 | 1.0000 |
+| Bankruptcy | 5% | 15/84 (17.9) | 16/84 (19.0) | 7 | 8 | 1.0000 |
+| Bankruptcy | 10% | 27/84 (32.1) | 32/84 (38.1) | 2 | 7 | 0.1797 |
+| Enforcement | 1% | 0/30 (0.0) | 0/30 (0.0) | 0 | 0 | 1.0000 |
+| Enforcement | 5% | 1/30 (3.3) | 2/30 (6.7) | 1 | 2 | 1.0000 |
+| Enforcement | 10% | 6/30 (20.0) | 5/30 (16.7) | 4 | 3 | 1.0000 |
+
+*Note.* Positive-report denominators are 84 for bankruptcy and 30 for enforcement. Paired $p$-values are two-sided exact binomial tests on discordant positive-report classifications, equivalent to exact McNemar tests. Event rows linked repeatedly to the same bankruptcy report are counted once in this analysis.
+
+The supervised challenger was competitive for broad bankruptcy prioritization, but the paired results provide no evidence that it consistently outperformed MOSAIC. The enforcement analysis is underpowered because it contains only 30 known-positive reports.
+
+### Exact case-level attribution
+
+For report record $(i,t)$, the exact contribution of signal $k$ is
+
+```math
+C_{itk}
+=
+w_k^{*(c(i))}
+\widetilde{S}_{it}^{(k)},
+```
+
+and the implemented score satisfies
+
+```math
+F_{it}
+=
+\sum_{k=1}^K C_{itk}.
+```
+
+The full reconstruction audit reproduced every stored primary MOSAIC score with a maximum absolute error of $9.196\times10^{-8}$. The final case-audit file contains all 108 contributions for each of three representative Critical-tier pre-bankruptcy reports. The cases are the records nearest the 25th, 50th, and 75th percentiles of the exact-linked Critical-event score distribution. For each case, the eight largest contributions and the combined remainder sum to the corresponding stored score (Table S3.5 and the accompanying figure).
+
+**Table S3.5: Summary of representative exact-attribution cases**
+
+| Case | Selection percentile | MOSAIC score | Top-eight contribution | Top-eight share (%) | All other signals |
 |---|---:|---:|---:|---:|---:|
-| GBM | 83,512 | 0.6299 | 0.5586 | 0.5962 | 0.4492 |
-| GBM-X | 83,512 | 0.6149 | 0.5436 | 0.5799 | 0.4409 |
+| Case A | 25th | 0.515070 | 0.196114 | 38.1 | 0.318956 |
+| Case B | 50th | 0.517947 | 0.286052 | 55.2 | 0.231895 |
+| Case C | 75th | 0.523280 | 0.194688 | 37.2 | 0.328592 |
 
-*Note.* Quartile separation is the difference in mean model-score percentile between observations in the upper and lower quartiles of the distress anchor. Because GBM and GBM-X were trained on the Baseline distress anchor, these statistics should not be interpreted as independent validation.
+> *[Insert `S3_case_interpretability_final` figure here — signal-level decomposition of the three cases above.]*
 
-The supervised comparator did not uniformly dominate MOSAIC in external validation. GBM exactly matched MOSAIC's High plus Critical bankruptcy capture at 73.3%, but GBM placed fewer bankruptcy events in the Critical tier (41.9% versus 52.3%). GBM-X produced the highest broad bankruptcy capture at 77.9%, although its Critical capture remained below MOSAIC-X (40.7% versus 47.7%). For enforcement, GBM and GBM-X captured 23.3% and 26.7% of events in the Critical tier, respectively, compared with 50.0% for MOSAIC and 43.3% for MOSAIC-X. The supervised model was therefore competitive for broad bankruptcy screening but did not reproduce MOSAIC's concentration of enforcement events or bankruptcy events within the most extreme tier.
+The attribution values explain score construction rather than causation. A large contribution means that a report has a high normalized value for a signal that also receives substantial weight in its peer cohort. It does not establish that the signal caused bankruptcy, enforcement action, financial distress, or reporting misconduct.
 
----
+### Supplementary interpretation
 
-## C.5 Paired event-capture comparisons
-
-Paired exact tests compared model classifications for the same bankruptcy events. At the High plus Critical level, GBM and MOSAIC each uniquely captured eight events, producing no paired difference ($p=1.000$). GBM-X uniquely captured ten events and MOSAIC-X uniquely captured four at the High plus Critical level, but this difference was not statistically significant ($p=0.180$). At the Critical level, GBM-X uniquely captured eight events and MOSAIC-X uniquely captured fourteen, which likewise did not constitute a statistically significant paired difference ($p=0.286$).
-
-**Table C.4: Paired exact comparisons of bankruptcy event capture**
-
-| Model A | Model B | Tier | A only | B only | Discordant | $p$ |
-|---|---|---|---:|---:|---:|---:|
-| GBM | MOSAIC | High + Critical | 8 | 8 | 16 | 1.0000 |
-| GBM-X | MOSAIC-X | High + Critical | 10 | 4 | 14 | 0.1796 |
-| GBM-X | MOSAIC-X | Critical | 8 | 14 | 22 | 0.2863 |
-
-*Note.* Reported $p$-values are two-sided exact binomial tests applied to discordant event pairs, equivalent to an exact McNemar comparison.
-
----
-
-## C.6 Supplementary interpretation
-
-The supplementary analyses support four conclusions. First, MOSAIC's external-validation performance is not explained by the operating-margin bunching and curvature signals removed in MOSAIC-X. Second, the behavioral, analytical, and model-based families contribute differently across review depths and outcomes, but no single family is necessary for the principal bankruptcy result. Third, the supervised GBM challenger did not significantly outperform MOSAIC in paired bankruptcy comparisons and was substantially less concentrated in the Critical tier for enforcement. Fourth, the exact attribution audit confirms that MOSAIC's case-level explanations are algebraically faithful to the implemented score. The combined evidence supports MOSAIC as a robust, weakly supervised screening framework while preserving GBM as a distinct supervised benchmark rather than incorporating it as another weighted ensemble element.
+The robustness analyses support four conclusions. First, the primary internal alignment is not dependent on operating-margin bunching and curvature, although those terms contribute to external event concentration. Second, behavioral signals provide the largest unique contribution to alignment with the supervisory reference, while analytical and model-based families affect broad and extreme-tail event capture differently. Third, the supervised GBM challenger does not significantly outperform MOSAIC under paired report-level review budgets. Fourth, the exact attribution audit is algebraically faithful to the implemented score and requires no post-hoc surrogate explanation.
